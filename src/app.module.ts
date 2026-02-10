@@ -19,22 +19,19 @@ import { MailModule } from './mail/mail.module';
       isGlobal: true,
       envFilePath: '.env',
       validationSchema: Joi.object({
-        // 1. BASE DE DATOS (Aceptamos URL completa o partes)
-        DATABASE_URL: Joi.string().optional(),
+        // 1. BASE DE DATOS
+        DATABASE_URL: Joi.string().required(), // Ahora es requerida para conectar TypeORM
         
-        // 2. SUPABASE (Solo Auth, ya no Storage)
+        // 2. SUPABASE (Auth + Storage)
         SUPABASE_URL: Joi.string().required(),
-        SUPABASE_KEY: Joi.string().optional(), // A veces se llama KEY o ANON_KEY
-        SUPABASE_SERVICE_ROLE_KEY: Joi.string().optional(), 
-        
-        // 3. CLOUDFLARE R2 (Las nuevas obligatorias)
-        R2_ACCOUNT_ID: Joi.string().required(),
-        R2_ACCESS_KEY_ID: Joi.string().required(),
-        R2_SECRET_ACCESS_KEY: Joi.string().required(),
-        R2_BUCKET_NAME: Joi.string().required(),
+        SUPABASE_KEY: Joi.string().required(),     // Service Role Key para el Back
+        SUPABASE_BUCKET: Joi.string().required(),  // Nombre del bucket (ej: 'documentos')
 
-        // 4. SEGURIDAD
+        // 3. SEGURIDAD
         JWT_SECRET: Joi.string().required(),
+
+        // 4. OTROS (Opcionales o Defaults)
+        PORT: Joi.number().default(3000),
       }),
     }),
 
@@ -42,30 +39,16 @@ import { MailModule } from './mail/mail.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
-        // Prioridad: Si existe DATABASE_URL (Transaction Pooler), usala.
         const databaseUrl = configService.get<string>('DATABASE_URL');
         
-        if (databaseUrl) {
-          return {
+        return {
             type: 'postgres',
             url: databaseUrl,
             entities: [Reclamo, User],
-            synchronize: false, // En producción siempre false
+            synchronize: true, // Ojo: En demo está bien true, en prod real mejor false + migraciones
             autoLoadEntities: true,
-            ssl: { rejectUnauthorized: false }, // Necesario para Render + Supabase
-          };
-        }
-
-        // Si no, intentamos armar la conexión manual (Legacy)
-        return {
-          type: 'postgres',
-          host: configService.get<string>('DB_HOST'),
-          port: configService.get<number>('DB_PORT'),
-          username: configService.get<string>('DB_USER'),
-          password: configService.get<string>('DB_PASS'),
-          database: configService.get<string>('DB_NAME'),
-          entities: [Reclamo, User],
-          synchronize: false,
+            // Configuración SSL necesaria para Render + Supabase Transaction Pooler
+            ssl: { rejectUnauthorized: false }, 
         };
       },
     }),
