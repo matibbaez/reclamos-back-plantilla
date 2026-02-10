@@ -10,10 +10,12 @@ async function bootstrap() {
 
   // 1. SEGURIDAD: Helmet protege tu app de vulnerabilidades web conocidas
   app.use(helmet()); 
-  
+
   // 2. CORS: Permite que el frontend (en otro dominio) se comunique con esta API
+  // Configuración corregida
   app.enableCors({
-    origin: '*', // <--- Acepta conexiones desde cualquier lado
+    // CAMBIO CLAVE: De '*' pasamos a 'true'
+    origin: true, 
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
