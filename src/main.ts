@@ -10,14 +10,10 @@ async function bootstrap() {
 
   // 1. SEGURIDAD: Helmet protege tu app de vulnerabilidades web conocidas
   app.use(helmet()); 
-
-  // 2. SEGURIDAD: CORS configurado para SOLO aceptar a tu web oficial
+  
+  // 2. CORS: Permite que el frontend (en otro dominio) se comunique con esta API
   app.enableCors({
-    origin: [
-      'https://reclamarte.ar',       
-      'https://www.reclamarte.ar',   
-      'http://localhost:4200',       
-    ],
+    origin: '*', // <--- Acepta conexiones desde cualquier lado
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
