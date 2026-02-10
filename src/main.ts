@@ -55,8 +55,10 @@ async function bootstrap() {
     console.log('✅ El usuario admin ya existe.');
   }
 
-  await app.listen(3000);
-  console.log(`🚀 API corriendo en el puerto 3000`);
+  const port = process.env.PORT || 3000;
+  await app.listen(port, '0.0.0.0');
+
+  console.log(`🚀 API corriendo en el puerto ${port}`);
   console.log(`📄 Documentación Swagger: http://localhost:3000/api/docs`);
 }
 bootstrap();
