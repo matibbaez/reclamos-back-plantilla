@@ -8,15 +8,19 @@ import helmet from 'helmet';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 1. SEGURIDAD: Helmet protege tu app de vulnerabilidades web conocidas
-  app.use(helmet()); 
-
-  // 2. CORS: Permite que el frontend (en otro dominio) se comunique con esta API
-  // Configuración corregida
+  // 1. HELMET: A veces bloquea recursos cruzados si no se configura
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // Permite que otros dominios lean respuestas
+  })); 
+  
+  // 2. CORS: Vamos a ser explícitos con tu dominio de Vercel
   app.enableCors({
-    // CAMBIO CLAVE: De '*' pasamos a 'true'
-    origin: true, 
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    origin: [
+      'http://localhost:4200',
+      'https://reclamos-plantilla.vercel.app', // Tu dominio principal (el que sale en el error)
+      /https:\/\/reclamos-plantilla.*\.vercel\.app$/ // Expresión regular para aceptar cualquier preview de Vercel
+    ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
 
