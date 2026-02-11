@@ -8,26 +8,28 @@ import helmet from 'helmet';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 1. HELMET: A veces bloquea recursos cruzados si no se configura
-  app.use(helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" }, // Permite que otros dominios lean respuestas
-  })); 
-  
-  // 2. CORS: Vamos a ser explícitos con tu dominio de Vercel
+  // 1. HELMET (Desactivado por ahora para evitar conflictos)
+  // app.use(helmet()); 
+
+  // 2. CORS: LA CONFIGURACIÓN DEFINITIVA
   app.enableCors({
     origin: [
       'http://localhost:4200',
-      'https://reclamos-plantilla.vercel.app', // Tu dominio principal (el que sale en el error)
-      /https:\/\/reclamos-plantilla.*\.vercel\.app$/ // Expresión regular para aceptar cualquier preview de Vercel
+      'http://localhost:3000',
+      // ESTA LÍNEA ES LA MAGIA: Acepta cualquier subdominio de vercel.app
+      /^https:\/\/.*\.vercel\.app$/,
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
+    allowedHeaders: 'Content-Type,Authorization,X-Requested-With,Accept',
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
 
-  // 3. VALIDACIÓN: Limpieza automática de datos entrantes
+  // 3. VALIDACIÓN
   app.useGlobalPipes(new ValidationPipe({
-    whitelist: true, // Elimina campos que no estén en los DTO
-    forbidNonWhitelisted: true, // Tira error si envían datos extra
+    whitelist: true, 
+    forbidNonWhitelisted: true, 
   }));
 
   // 4. DOCUMENTACIÓN: Swagger disponible en /api/docs
