@@ -1,3 +1,5 @@
+// E:\estudio-plantilla\estudio-api\src\reclamos\dto\create-reclamo.dto.ts
+
 import {
   IsString,
   IsEmail,
@@ -6,13 +8,11 @@ import {
   MaxLength,
   Matches,
   IsNumberString,
-  IsOptional,       // <--- IMPORTANTE
-  IsBooleanString,  // <--- IMPORTANTE (Para el switch que viene como string)
+  IsOptional,
+  IsBooleanString,
 } from 'class-validator';
 
 export class CreateReclamoDto {
-  
-  // --- TUS CAMPOS ORIGINALES (ESTÁN PERFECTOS) ---
   @IsString()
   @IsNotEmpty()
   @MinLength(3) 
@@ -30,10 +30,12 @@ export class CreateReclamoDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
-  
 
-  // --- LOS NUEVOS CAMPOS OBLIGATORIOS PARA LA LÓGICA ---
-  
+  // --- AGREGÁ ESTO ---
+  @IsString()
+  @IsNotEmpty({ message: 'El teléfono es obligatorio' })
+  telefono: string; 
+
   @IsString()
   @IsNotEmpty({ message: 'El tipo de trámite es obligatorio' })
   tipo_tramite: string;
@@ -42,9 +44,6 @@ export class CreateReclamoDto {
   @IsString()
   subtipo_tramite?: string;
 
-  // --- CAMPOS ESPECÍFICOS DE RECHAZO (TEXTOS) ---
-  // Tienen que ser @IsOptional porque si el trámite es "Alta", no vienen.
-  
   @IsOptional()
   @IsString()
   jornada_laboral?: string;
@@ -57,8 +56,6 @@ export class CreateReclamoDto {
   @IsString()
   trayecto_habitual?: string;
 
-  // --- SWITCH DE ABOGADO ANTERIOR ---
-  // Usamos @IsBooleanString porque FormData convierte true en "true"
   @IsOptional()
   @IsBooleanString()
   tiene_abogado_anterior?: string;
